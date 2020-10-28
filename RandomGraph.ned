@@ -16,6 +16,7 @@ import inet.applications.tcpapp.TcpEchoApp;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
+import inet.common.misc.ThruputMeteringChannel;
 
 module Node {
     parameters:
@@ -25,18 +26,18 @@ module Node {
     connections allowunconnected:
 }
 
-channel client_client_link extends DatarateChannel {
+channel client_client_link extends ThruputMeteringChannel {
     parameters:
-        int cost = default(1);
-        datarate = 10Mbps;
+        datarate = 1Mbps;
         delay = 1ms;
+        thruputDisplayFormat = "u|B";
 }
 
-channel client_server_link extends DatarateChannel {
+channel client_server_link extends ThruputMeteringChannel {
     parameters:
-        int cost = default(1);
-        datarate = 100Mbps;
+        datarate = 1Mbps;
         delay = 0.1ms;
+        thruputDisplayFormat = "u|B";
 }
    
 module Client extends StandardHost {
@@ -46,8 +47,8 @@ module Client extends StandardHost {
 
 network Network {
     parameters:
-	int n; // = default(5);
-	double connectedness = default(0.4); 
+	int n; // = default(10);
+	double connectedness; // = default(0.4); 
 
     submodules:
         node[n]: Client;
