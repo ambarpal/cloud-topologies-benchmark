@@ -44,6 +44,7 @@ module Client extends StandardHost {
     parameters:
         forwarding = true;
 }
+//switches
 
 network Network {
     parameters:
@@ -52,6 +53,7 @@ network Network {
 
     submodules:
         node[n]: Client;
+//        switch[4]: EtherSwitch{};
         server: StandardHost{
             @display("i=device/pc2");
         }; 
@@ -62,6 +64,6 @@ network Network {
 			node[i].pppg++ <--> client_client_link <--> node[j].pppg++ if uniform(0,1)<connectedness;
         }
         for i = 0..n-1 {
-            node[i].pppg++ <--> client_server_link <--> server.pppg++ if uniform(0,1) < 0.6; 
+            node[i].pppg++ <--> client_server_link <--> server.pppg++ if uniform(0,1) <0.3; 
         }
 }
