@@ -17,6 +17,7 @@ import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 import inet.common.misc.ThruputMeteringChannel;
+import inet.node.ethernet.EtherSwitch;
 
 module Node {
     parameters:
@@ -53,7 +54,7 @@ network Network {
 
     submodules:
         node[n]: Client;
-//        switch[4]: EtherSwitch{};
+        switch[4]: EtherSwitch{};
         server: StandardHost{
             @display("i=device/pc2");
         }; 
