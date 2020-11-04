@@ -37,7 +37,7 @@ network Basic_fat_tree
         int total_num_aggSwitches = k*num_aggSwitches_perPod;
         int total_num_edgeSwitches = k*num_edgeSwitches_perPod;
         int total_num_servers = num_servers_perEdge*total_num_edgeSwitches;
-        int total_num_coreSwitches = pow(int(k/2), 2);
+        int total_num_coreSwitches = int(pow(int(k/2), 2));
 
         int num_switchGates = k; //All switches have k-gates.
 
@@ -89,13 +89,13 @@ network Basic_fat_tree
         }
 
         //Edge Agg connections 
-        for pod=0..k-1, for edge=0..num_edgeSwitches_perPod-1, for agg=0..aggSwitches_perPod-1 {
+        for pod=0..k-1, for edge=0..num_edgeSwitches_perPod-1, for agg=0..num_aggSwitches_perPod-1 {
             edgeSwitches[pod*num_edgeSwitches_perPod + edge].ethg[num_servers_perEdge + agg] <--> EdgeAggChannel 
             <--> aggSwitches[pod*num_aggSwitches_perPod + agg].ethg[edge];
         }
 		
 		//Agg Core connections
-		for pod=0..k-1, for agg=0..num_aggSwitches_perPod-1, for c = 0..num_switchGates-1 {
+		for pod=0..k-1, for agg=0..num_aggSwitches_perPod-1, for c = 0..int(num_switchGates/2)-1 {
 		    aggSwitches[pod*num_aggSwitches_perPod + agg].ethg[num_edgeSwitches_perPod + c] <--> AggCoreChannel
 		    <--> coreSwitches[agg*(int(k/2)) + c].ethg[pod];
 		}
