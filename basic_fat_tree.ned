@@ -28,17 +28,16 @@ import ned.DatarateChannel;
 network Basic_fat_tree
 {
     parameters:
-        int k = int(4); //k-ary fat-tree 
-        int kby2 = (k >> 1);
+        int k = 4; //k-ary fat-tree 
 
-        int num_edgeSwitches_perPod = kby2;
-        int num_aggSwitches_perPod = kby2;
-        int num_servers_perEdge = kby2;
+        int num_edgeSwitches_perPod = (k/2);
+        int num_aggSwitches_perPod = (k/2);
+        int num_servers_perEdge = k/2;
 
         int total_num_aggSwitches = k*num_aggSwitches_perPod;
         int total_num_edgeSwitches = k*num_edgeSwitches_perPod;
         int total_num_servers = num_servers_perEdge*total_num_edgeSwitches;
-        int total_num_coreSwitches = int(pow(kby2, 2));
+        int total_num_coreSwitches = pow(k/2, 2);
 
         int num_switchGates = k; //All switches have k-gates.
 
@@ -84,20 +83,21 @@ network Basic_fat_tree
 
     connections allowunconnected:
         //Server edge connections
-        for pod=int(0)..k-1, for edge=int(0)..num_edgeSwitches_perPod-1, for host=int(0)..num_servers_perEdge-1 {
+        for pod=0..k-1, for edge=0..num_edgeSwitches_perPod-1, for host=0..num_servers_perEdge-1 {
             edgeSwitches[pod*num_edgeSwitches_perPod + edge].ethg[host] <--> ServerEdgeChannel 
             <--> servers[pod*num_edgeSwitches_perPod*num_servers_perEdge + edge*num_servers_perEdge + host].ethg++;
         }
 
         //Edge Agg connections 
-        for pod=int(0)..k-1, for edge=int(0)..num_edgeSwitches_perPod-1, for agg=int(0)..num_aggSwitches_perPod-1 {
+        for pod=0..k-1, for edge=0..num_edgeSwitches_perPod-1, for agg=0..aggSwitches_perPod-1 {
             edgeSwitches[pod*num_edgeSwitches_perPod + edge].ethg[num_servers_perEdge + agg] <--> EdgeAggChannel 
             <--> aggSwitches[pod*num_aggSwitches_perPod + agg].ethg[edge];
         }
 		
 		//Agg Core connections
-		for pod=int(0)..k-1, for agg=int(0)..num_aggSwitches_perPod-1, for c = int(0)..num_switchGates-1 {
+		for pod=0..k-1, for agg=0..num_aggSwitches_perPod-1, for c = 0..num_switchGates-1 {
 		    aggSwitches[pod*num_aggSwitches_perPod + agg].ethg[num_edgeSwitches_perPod + c] <--> AggCoreChannel
-		    <--> coreSwitches[agg*(kby2) + c].ethg[pod];
+		    <--> coreSwitches[agg*(k/2) + c].ethg[pod];
 		}
+		
 }
