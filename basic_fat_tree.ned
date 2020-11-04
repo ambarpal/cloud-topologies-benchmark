@@ -30,14 +30,14 @@ network Basic_fat_tree
     parameters:
         int k = 4; //k-ary fat-tree 
 
-        int num_edgeSwitches_perPod = (k/2);
-        int num_aggSwitches_perPod = (k/2);
-        int num_servers_perEdge = k/2;
+        int num_edgeSwitches_perPod = int(k/2);
+        int num_aggSwitches_perPod = int(k/2);
+        int num_servers_perEdge = int(k/2);
 
         int total_num_aggSwitches = k*num_aggSwitches_perPod;
         int total_num_edgeSwitches = k*num_edgeSwitches_perPod;
         int total_num_servers = num_servers_perEdge*total_num_edgeSwitches;
-        int total_num_coreSwitches = pow(k/2, 2);
+        int total_num_coreSwitches = pow(int(k/2), 2);
 
         int num_switchGates = k; //All switches have k-gates.
 
@@ -97,7 +97,7 @@ network Basic_fat_tree
 		//Agg Core connections
 		for pod=0..k-1, for agg=0..num_aggSwitches_perPod-1, for c = 0..num_switchGates-1 {
 		    aggSwitches[pod*num_aggSwitches_perPod + agg].ethg[num_edgeSwitches_perPod + c] <--> AggCoreChannel
-		    <--> coreSwitches[agg*(k/2) + c].ethg[pod];
+		    <--> coreSwitches[agg*(int(k/2)) + c].ethg[pod];
 		}
 		
 }
