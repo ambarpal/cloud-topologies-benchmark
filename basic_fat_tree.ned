@@ -99,5 +99,4 @@ network Basic_fat_tree
 		    aggSwitches[pod*num_aggSwitches_perPod + agg].ethg[num_edgeSwitches_perPod + c] <--> AggCoreChannel
 		    <--> coreSwitches[agg*(int(k/2)) + c].ethg[pod];
 		}
-		
 }
