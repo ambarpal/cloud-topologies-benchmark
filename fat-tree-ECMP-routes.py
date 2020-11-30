@@ -18,6 +18,9 @@ total_num_coreSwitches = int(pow(int(k/2), 2))
 num_switchGates = k #All switches have k-gates.
 
 
+demand_type = "rand_perm" #Type of demand pairs: rand_perm, 
+
+
 '''Network class containing mapping of network.'''
 class Network_Mapping: 
 	def __init__(self):
@@ -126,8 +129,6 @@ def find_random_route(nmap, src_srv_id, dst_srv_id):
 		curr_min = min(frontier_dists)
 		frontier_withMin = set(filter(lambda n: curr_distances[n] == curr_min, frontier))
 		
-		# print ("frontier_withMin")
-		# print (frontier_withMin)
 
 		(layer_id, node_id) = random.choice(list(frontier_withMin))
 		adj_layer_maps = nmap.connections[layer_id]
@@ -139,9 +140,6 @@ def find_random_route(nmap, src_srv_id, dst_srv_id):
 
 			adj_frontier = set(filter(lambda n: not (n in visited), adj_frontier))
 
-			# print ("adj_frontier")
-			# print (adj_frontier)
-
 			for n in adj_frontier: 
 				visited[n] = (layer_id, node_id)
 				curr_distances[n] = curr_min + 1
@@ -149,11 +147,6 @@ def find_random_route(nmap, src_srv_id, dst_srv_id):
 		
 		frontier.remove((layer_id, node_id))
 		
-		# print ("frontier")
-		# print (frontier)
-		# print ("visited")
-		# print (visited)
-
 	assert (len(visited) == sum(nmap.num_nodes)) #double check
 
 	#Stitch up the path from visited
@@ -163,9 +156,6 @@ def find_random_route(nmap, src_srv_id, dst_srv_id):
 	while curr_node != (0, src_srv_id): 
 		next_node = visited[curr_node]
 		
-		# print ("(next node, curr node)")
-		# print (next_node[1], curr_node[1])
-
 		i = (nmap.connection_indices[next_node[0]]).index(curr_node[0])
 		nextToCurrLayer_map = nmap.connections[next_node[0]][i]
 		p = list(filter(lambda n : n[0] == curr_node[1], nextToCurrLayer_map[next_node[1]]))[0]
@@ -223,11 +213,9 @@ def write_ECMP_routes(f, net_map, demand_perm):
 			dst_label = "servers[%d]"%demand_perm[i]
 			write_route_xml(f, route[h][0], dst_label, route[h+1][0], route[h][1])
 
-
-'''Create xml file for k value, run instance of ECMP 
-	and write the routes for all pairs of servers.'''
-def main(demand_perm): 
-	f  = open("routes_fat_tree_k=%d.xml"%k, "w+") 
+'''Given a set of demands, calculates ECMP routes and writes to xml file'''
+def create_routes_file(demand_perm):
+	f  = open("routes_fat_tree_k=%d_%s.xml"%(k, demand_type), "w+") 
 	f.write("<config>\n")
 	f.write("	<interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/>\n")
 
@@ -240,6 +228,63 @@ def main(demand_perm):
 
 
 
+
+
+
+
+
+
+###############################################################
+#INI File Stuff
+###############################################################
+def create_ini_file(demand_perm): 
+	f  = open("basic_fat_tree_k=%d_%s.ini"%(k, demand_type), "w+") 
+	for i in range(len(demand_perm)): 
+		line = ('''**.servers[%d].numApps = 2
+		**.servers[%d].app[0].typename = "TcpSessionApp"
+		**.servers[%d].app[0].active = true
+		**.servers[%d].app[0].localPort = -1
+		**.servers[%d].app[0].connectAddress = "servers[%d]"
+		**.servers[%d].app[0].connectPort = 1000
+		**.servers[%d].app[0].sendBytes = 1MiB
+		**.servers[%d].app[0].tClose = -1s
+
+		**.servers[%d].app[1].typename = "TcpSinkApp"
+		**.servers[%d].app[1].localPort = 1000\n''' % 
+		(i, i, i, i, i, demand_perm[i], i, i, i, demand_perm[i], demand_perm[i]))
+
+		f.write(line)
+	f.close()
+
+
+
+
+
+
+
+
+
+
+
+
+#MAIN STUFF 
+#####################################################
+'''Creates a demand matrix in terms of demadn_type'''
+def create_demand_perm(): 
+	if demand_type == "rand_perm": 
+		return np.random.permutation(total_num_servers)
+
+
+
+def main(): 
+	demand_perm = create_demand_perm()
+	create_ini_file(demand_perm) 
+	create_routes_file(demand_perm)
+	
+
+
+
+
 # net_map = Network_Mapping()
 # net_map.create_network_mapping()
 # print (net_map.server_edge)
@@ -247,5 +292,5 @@ def main(demand_perm):
 # print (net_map.agg_core)
 # print (net_map.edge_server)
 
-main(np.random.permutation(total_num_servers))
+main()
 	
