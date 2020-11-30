@@ -42,6 +42,7 @@ channel generic_link extends ThruputMeteringChannel {
         datarate = 10Mbps;
         delay = 1ms;
         thruputDisplayFormat = "u|B";
+//  	@statistic[throughput](source="sumPerDuration(packetBits(messageSent))"; record=last?; unit=Mbps);
 }
    
 module Server extends StandardHost {
@@ -57,6 +58,9 @@ network JellyFish {
 	int nSwitchPorts = default(3);
 	int nServers = nServerPorts * nSwitch;
 	
+	@statistic[throughput](source=liveThroughput(server[5].app[0].packetReceived)/1000000; record=figure; targetFigure=panel.throughput; checkSignals=false);
+	@figure[panel](type=panel; pos=1.5,0.1);
+	@figure[panel.throughput](type=linearGauge; pos=250,50; size=250,30; minValue=0; maxValue=54; tickSize=6; label="Application level throughput [Mbps]");
     submodules:
         switch[nSwitch]: EtherSwitch;
         server[nServers]: Server;
@@ -113,14 +117,14 @@ router[1].ethg[1] <--> generic_link <--> router[4].ethg[1];
 router[2].ethg[1] <--> generic_link <--> router[3].ethg[1];
 router[2].ethg[2] <--> generic_link <--> router[4].ethg[2];
 // Generated Router-Server Links
-server[0].ethg++ <--> Eth10M <--> router[0].ethg++;
-server[1].ethg++ <--> Eth10M <--> router[0].ethg++;
-server[2].ethg++ <--> Eth10M <--> router[1].ethg++;
-server[3].ethg++ <--> Eth10M <--> router[1].ethg++;
-server[4].ethg++ <--> Eth10M <--> router[2].ethg++;
-server[5].ethg++ <--> Eth10M <--> router[2].ethg++;
-server[6].ethg++ <--> Eth10M <--> router[3].ethg++;
-server[7].ethg++ <--> Eth10M <--> router[3].ethg++;
-server[8].ethg++ <--> Eth10M <--> router[4].ethg++;
-server[9].ethg++ <--> Eth10M <--> router[4].ethg++;
+server[0].ethg++ <--> generic_link <--> router[0].ethg++;
+server[1].ethg++ <--> generic_link <--> router[0].ethg++;
+server[2].ethg++ <--> generic_link <--> router[1].ethg++;
+server[3].ethg++ <--> generic_link <--> router[1].ethg++;
+server[4].ethg++ <--> generic_link <--> router[2].ethg++;
+server[5].ethg++ <--> generic_link <--> router[2].ethg++;
+server[6].ethg++ <--> generic_link <--> router[3].ethg++;
+server[7].ethg++ <--> generic_link <--> router[3].ethg++;
+server[8].ethg++ <--> generic_link <--> router[4].ethg++;
+server[9].ethg++ <--> generic_link <--> router[4].ethg++;
 }

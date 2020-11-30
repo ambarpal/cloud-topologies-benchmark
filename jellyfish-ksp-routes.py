@@ -85,20 +85,23 @@ def ksp(src, dst, k):
 	return res
 
 # Specifying the list of servers that want to send information from one to another
-demands = [(0, 9), (9, 0), (1, 2), (3, 4), (5, 6), (9, 3), (3, 9)]
+demands = [(0, 5), (6, 3), (2, 1), (9, 4)]
 print ('####################################################################')
 print ('# Application Setup')
 for (src, dst) in demands:
 	print ('JellyFishRouter.server[{}].numApps = 1'.format(src))
 	print ('JellyFishRouter.server[{}].app[0].typename = "TcpSessionApp"'.format(src))
-	print ('JellyFishRouter.server[{}].app[0].active = true'.format(src))
-	print ('JellyFishRouter.server[{}].app[0].localPort = -1'.format(src))
+	# print ('JellyFishRouter.server[{}].app[0].active = true'.format(src))
+	# print ('JellyFishRouter.server[{}].app[0].localPort = -1'.format(src))
 	print ('JellyFishRouter.server[{}].app[0].connectAddress = "server[{}]"'.format(src, dst))
 	print ('JellyFishRouter.server[{}].app[0].tOpen = 0.2s'.format(src))
 	print ('JellyFishRouter.server[{}].app[0].tSend = 0.4s'.format(src))
-	print ('JellyFishRouter.server[{}].app[0].sendBytes = 100kB'.format(src))
-	print ('JellyFishRouter.server[{}].app[0].sendScript = ""'.format(src))
+	print ('JellyFishRouter.server[{}].app[0].sendBytes = 10MiB'.format(src))
+	# print ('JellyFishRouter.server[{}].app[0].sendScript = ""'.format(src))
 	print ('JellyFishRouter.server[{}].app[0].tClose = 25s'.format(src))
+	print ('JellyFishRouter.server[{}].numApps = 1'.format(dst))
+	print ('JellyFishRouter.server[{}].app[0].typename = "TcpSinkApp"'.format(dst))
+
 print ('####################################################################')
 
 print ('####################################################################')
