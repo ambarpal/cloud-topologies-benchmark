@@ -2,6 +2,7 @@ import sys
 import random
 import numpy as np
 
+np.random.seed(123)
 
 '''Network parameters as stated in NED file.'''
 k = 4 
@@ -282,15 +283,61 @@ def main():
 	create_routes_file(demand_perm)
 	
 
+# main()
+
+ini_file_header = '''[General]
+network = Basic_fat_tree
 
 
+**.edgeSwitches[*].queueType = "DropTailQueue"
+**.edgeSwitches[*].queue.frameCapacity = 25
 
-# net_map = Network_Mapping()
-# net_map.create_network_mapping()
-# print (net_map.server_edge)
-# print (net_map.edge_agg)
-# print (net_map.agg_core)
-# print (net_map.edge_server)
+**.aggSwitches[*].queueType = "DropTailQueue"
+**.aggSwitches[*].queue.frameCapacity = 25
 
-main()
-	
+**.coreSwitches[*].queueType = "DropTailQueue"
+**.coreSwitches[*].queue.frameCapacity = 25
+
+# Configurator settings
+*.configurator.dumpAddresses = true
+*.configurator.dumpTopology = true
+*.configurator.dumpLinks = true
+*.configurator.dumpRoutes = true
+*.configurator.config = xmldoc("routes_fat_tree_k=4_rand_perm.xml")
+
+# Routing settings
+*.*.ipv4.arp.typename = "GlobalArp"
+*.*.ipv4.routingTable.netmaskRoutes = ""
+
+#Visualizer settings
+*.visualizer.interfaceTableVisualizer.displayInterfaceTables = true
+*.visualizer.interfaceTableVisualizer.nodeFilter = "not (*switch* or *Switch* or *AP*)"
+
+#Recording settings
+record-eventlog=false
+debug-on-errors = false
+**.cmdenv-log-level = off
+
+cmdenv-express-mode = true
+cmdenv-performance-display = true
+
+ **.statistic-recording=true
+**.tcpApp[*].rcvdPk:vector(packetBytes).vector-recording = true
+**.tcpApp[*].rcvdPk:sum(packetBytes).scalar-recording = true
+**.tcpApp[*].rcvdPk:count.scalar-recording = true
+**.coreSwitches[*].**.dropPk:count.scalar-recording = true
+**.coreSwitches[*].**.rcvdPk:count.scalar-recording = true
+**.aggSwitches[*].**.dropPk:count.scalar-recording = true
+**.aggSwitches[*].**.rcvdPk:count.scalar-recording = true
+**.edgeSwitches.**.dropPk:count.scalar-recording = true
+**.edgeSwitches.**.rcvdPk:count.scalar-recording = true
+**.servers[*].**.dropPk:count.scalar-recording = true
+**.servers[*].**.rcvdPk:count.scalar-recording = true
+**.servers[*].**.rcvdPk:sum(packetBytes).scalar-recording = true
+**.servers[*].**.dropPk:sum(packetBytes).scalar-recording = true
+#
+#**.scalar-recording=false
+#**.vector-recording=false
+#**.bin-recording=false
+
+**.channel.throughput.result-recording-modes=all'''
