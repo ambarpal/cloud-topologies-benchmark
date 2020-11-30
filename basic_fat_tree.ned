@@ -50,19 +50,19 @@ network Basic_fat_tree
     types: // Have to update datarate and delay!
         channel ServerEdgeChannel extends DatarateChannel
         {
-            datarate = 10Gbps;
-            delay = 1us;
+            datarate = 1Gbps;
+            delay = 0.1us;
         }
 
         channel EdgeAggChannel extends DatarateChannel
         {
-             datarate = 10Gbps;
-            delay = 1us;
+             datarate = 1Gbps;
+            delay = 0.1us;
         }
         channel AggCoreChannel extends DatarateChannel
         {
-             datarate = 10Gbps;
-            delay = 1us;
+             datarate = 1Gbps;
+            delay = 0.1us;
         }
     submodules:
 		configurator: Ipv4NetworkConfigurator;
