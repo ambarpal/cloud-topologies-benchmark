@@ -21,25 +21,30 @@ import inet.applications.tcpapp.TcpEchoAppThread;
 import inet.common.misc.NetAnimTrace;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.networklayer.configurator.ipv4.Ipv4FlatNetworkConfigurator;
+import inet.visualizer.integrated.IntegratedCanvasVisualizer;
 import inet.node.ethernet.EtherSwitch;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.Eth10M;
+import inet.node.inet.Router;
+
 
 network Basic_fat_tree
 {
     parameters:
-        int k = 4; //k-ary fat-tree 
+        int k = default(4); //k-ary fat-tree 
 
-        int num_edgeSwitches_perPod = int(k/2);
-        int num_aggSwitches_perPod = int(k/2);
-        int num_servers_perEdge = int(k/2);
+        int num_edgeSwitches_perPod = default(int(k/2));
+        int num_aggSwitches_perPod = default(int(k/2));
+        int num_servers_perEdge = default(int(k/2));
 
-        int total_num_aggSwitches = k*num_aggSwitches_perPod;
-        int total_num_edgeSwitches = k*num_edgeSwitches_perPod;
-        int total_num_servers = num_servers_perEdge*total_num_edgeSwitches;
-        int total_num_coreSwitches = int(pow(int(k/2), 2));
+        int total_num_aggSwitches = default(k*num_aggSwitches_perPod);
+        int total_num_edgeSwitches = default(k*num_edgeSwitches_perPod);
+        int total_num_servers = default(num_servers_perEdge*total_num_edgeSwitches);
+        int total_num_coreSwitches = default(int(pow(int(k/2), 2)));
 
-        int num_switchGates = k; //All switches have k-gates.
+        int num_switchGates = default(k); //All switches have k-gates.
 
         @display("bgb=738,422");
     types: // Have to update datarate and delay!
@@ -60,23 +65,27 @@ network Basic_fat_tree
             delay = 1us;
         }
     submodules:
-        configurator: Ipv4NetworkConfigurator;
+		configurator: Ipv4NetworkConfigurator;
+        visualizer: IntegratedCanvasVisualizer {
+            @display("p=98.8575,209.81999");
+        }
+        
         servers[total_num_servers]: StandardHost {
             parameters:
                 @display("i=device/pc2");
         }
 
-        edgeSwitches[total_num_edgeSwitches]: EtherSwitch {
+        edgeSwitches[total_num_edgeSwitches]: Router {
             gates:
                 ethg[num_switchGates]; // first num_servers_perEdge gates used for hosts
         }
 
-        aggSwitches[total_num_aggSwitches]: EtherSwitch {
+        aggSwitches[total_num_aggSwitches]: Router {
             gates:
                 ethg[num_switchGates]; // first num_aggSwitches_perPod gates used for edge connections
         }
 
-        coreSwitches[total_num_coreSwitches]: EtherSwitch {
+        coreSwitches[total_num_coreSwitches]: Router {
             gates:
                 ethg[num_switchGates];
         }
@@ -99,4 +108,5 @@ network Basic_fat_tree
 		    aggSwitches[pod*num_aggSwitches_perPod + agg].ethg[num_edgeSwitches_perPod + c] <--> AggCoreChannel
 		    <--> coreSwitches[agg*(int(k/2)) + c].ethg[pod];
 		}
+		
 }
