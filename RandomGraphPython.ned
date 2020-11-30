@@ -39,23 +39,9 @@ module Node {
 
 channel generic_link extends ThruputMeteringChannel {
     parameters:
-        datarate = 1Gbps;
+        datarate = 10Mbps;
         delay = 1ms;
         thruputDisplayFormat = "u|B";
-}
-
-channel server_switch_link extends ThruputMeteringChannel {
-    parameters:
-        datarate = 1Gbps;
-        delay = 1ms;
-        thruputDisplayFormat = "";
-}
-
-channel switch_switch_link extends ThruputMeteringChannel {
-    parameters:
-        datarate = 10Gbps;
-        delay = 0ms;
-        thruputDisplayFormat = "";
 }
    
 module Server extends StandardHost {
@@ -104,7 +90,10 @@ network JellyFishRouter {
 	int nServers = nServerPorts * nRouter;
 	
     submodules:
-		router[nRouter]: Router;
+		router[nRouter]: Router{
+		   gates:
+                ethg[nRouterPorts + nServerPorts];
+		};
         server[nServers]: Server;
        	configurator: Ipv4NetworkConfigurator;
        	visualizer: IntegratedCanvasVisualizer {
@@ -112,18 +101,26 @@ network JellyFishRouter {
         }
     
     connections allowunconnected:
-        for idx = 0..nServers-1{
-            server[idx].ethg++ <--> Eth100M <--> router[int(idx / nServerPorts)].ethg++;
-        }
-
         // ------------------------------------------- PASTE HERE FOR ROUTER CONFIG --------------------------------------------
         // Run generate_jellyfish_router.py
         // ------------------------------------------- PASTE HERE FOR ROUTER CONFIG -------------------------------------------- 
-        router[0].ethg++ <--> generic_link <--> router[1].ethg++;
-        router[0].ethg++ <--> generic_link <--> router[3].ethg++;
-        router[0].ethg++ <--> generic_link <--> router[4].ethg++;
-        router[1].ethg++ <--> generic_link <--> router[3].ethg++;
-        router[1].ethg++ <--> generic_link <--> router[4].ethg++;
-        router[2].ethg++ <--> generic_link <--> router[3].ethg++;
-        router[2].ethg++ <--> generic_link <--> router[4].ethg++;
+// Generated Router-Router Links
+router[0].ethg[0] <--> generic_link <--> router[1].ethg[0];
+router[0].ethg[1] <--> generic_link <--> router[3].ethg[0];
+router[0].ethg[2] <--> generic_link <--> router[4].ethg[0];
+router[1].ethg[2] <--> generic_link <--> router[2].ethg[0];
+router[1].ethg[1] <--> generic_link <--> router[4].ethg[1];
+router[2].ethg[1] <--> generic_link <--> router[3].ethg[1];
+router[2].ethg[2] <--> generic_link <--> router[4].ethg[2];
+// Generated Router-Server Links
+server[0].ethg++ <--> Eth10M <--> router[0].ethg++;
+server[1].ethg++ <--> Eth10M <--> router[0].ethg++;
+server[2].ethg++ <--> Eth10M <--> router[1].ethg++;
+server[3].ethg++ <--> Eth10M <--> router[1].ethg++;
+server[4].ethg++ <--> Eth10M <--> router[2].ethg++;
+server[5].ethg++ <--> Eth10M <--> router[2].ethg++;
+server[6].ethg++ <--> Eth10M <--> router[3].ethg++;
+server[7].ethg++ <--> Eth10M <--> router[3].ethg++;
+server[8].ethg++ <--> Eth10M <--> router[4].ethg++;
+server[9].ethg++ <--> Eth10M <--> router[4].ethg++;
 }
