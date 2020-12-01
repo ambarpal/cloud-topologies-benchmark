@@ -90,15 +90,14 @@ network JellyFish {
 
 network JellyFishRouter {
     parameters:
-	int nRouter = default(16);
-	int nRouterPorts = default(3);
-	int nServerPorts = default(1);
-	int nServers = nServerPorts * nRouter;
+	int nRouter = 20;
+	int nPorts =  4;
+	int nServers = 16;
 	
     submodules:
 		router[nRouter]: Router{
 		   gates:
-                ethg[nRouterPorts + nServerPorts];
+                ethg[nPorts];
 		};
         server[nServers]: Server;
        	configurator: Ipv4NetworkConfigurator;
@@ -110,65 +109,53 @@ network JellyFishRouter {
         // ------------------------------------------- PASTE HERE FOR ROUTER CONFIG --------------------------------------------
         // Run generate_jellyfish_router.py
         // ------------------------------------------- PASTE HERE FOR ROUTER CONFIG -------------------------------------------- 
-//// Generated Router-Router Links
-//router[0].ethg[0] <--> generic_link <--> router[1].ethg[0];
-//router[0].ethg[1] <--> generic_link <--> router[3].ethg[0];
-//router[0].ethg[2] <--> generic_link <--> router[4].ethg[0];
-//router[1].ethg[2] <--> generic_link <--> router[2].ethg[0];
-//router[1].ethg[1] <--> generic_link <--> router[4].ethg[1];
-//router[2].ethg[1] <--> generic_link <--> router[3].ethg[1];
-//router[2].ethg[2] <--> generic_link <--> router[4].ethg[2];
-//// Generated Router-Server Links
-//server[0].ethg++ <--> generic_link <--> router[0].ethg++;
-//server[1].ethg++ <--> generic_link <--> router[0].ethg++;
-//server[2].ethg++ <--> generic_link <--> router[1].ethg++;
-//server[3].ethg++ <--> generic_link <--> router[1].ethg++;
-//server[4].ethg++ <--> generic_link <--> router[2].ethg++;
-//server[5].ethg++ <--> generic_link <--> router[2].ethg++;
-//server[6].ethg++ <--> generic_link <--> router[3].ethg++;
-//server[7].ethg++ <--> generic_link <--> router[3].ethg++;
-//server[8].ethg++ <--> generic_link <--> router[4].ethg++;
-//server[9].ethg++ <--> generic_link <--> router[4].ethg++;
 // Generated Router-Router Links
-router[0].ethg[2] <--> generic_link <--> router[4].ethg[0];
-router[0].ethg[0] <--> generic_link <--> router[7].ethg[0];
-router[0].ethg[1] <--> generic_link <--> router[10].ethg[0];
-router[1].ethg[1] <--> generic_link <--> router[5].ethg[0];
-router[1].ethg[0] <--> generic_link <--> router[6].ethg[0];
-router[1].ethg[2] <--> generic_link <--> router[7].ethg[1];
-router[2].ethg[2] <--> generic_link <--> router[11].ethg[0];
-router[2].ethg[1] <--> generic_link <--> router[12].ethg[0];
-router[2].ethg[0] <--> generic_link <--> router[13].ethg[0];
-router[3].ethg[1] <--> generic_link <--> router[11].ethg[1];
-router[3].ethg[0] <--> generic_link <--> router[12].ethg[1];
-router[3].ethg[2] <--> generic_link <--> router[15].ethg[0];
-router[4].ethg[2] <--> generic_link <--> router[12].ethg[2];
-router[4].ethg[1] <--> generic_link <--> router[15].ethg[1];
-router[5].ethg[1] <--> generic_link <--> router[11].ethg[2];
-router[5].ethg[2] <--> generic_link <--> router[14].ethg[0];
-router[6].ethg[1] <--> generic_link <--> router[8].ethg[0];
-router[6].ethg[2] <--> generic_link <--> router[10].ethg[1];
-router[7].ethg[2] <--> generic_link <--> router[8].ethg[1];
-router[8].ethg[2] <--> generic_link <--> router[10].ethg[2];
-router[9].ethg[2] <--> generic_link <--> router[13].ethg[1];
-router[9].ethg[0] <--> generic_link <--> router[14].ethg[1];
-router[9].ethg[1] <--> generic_link <--> router[15].ethg[2];
-router[13].ethg[2] <--> generic_link <--> router[14].ethg[2];
+router[0].ethg[0] <--> generic_link <--> router[8].ethg[0];
+router[0].ethg[1] <--> generic_link <--> router[11].ethg[0];
+router[1].ethg[0] <--> generic_link <--> router[8].ethg[1];
+router[2].ethg[2] <--> generic_link <--> router[5].ethg[0];
+router[2].ethg[0] <--> generic_link <--> router[10].ethg[0];
+router[2].ethg[3] <--> generic_link <--> router[13].ethg[0];
+router[3].ethg[0] <--> generic_link <--> router[5].ethg[1];
+router[3].ethg[1] <--> generic_link <--> router[10].ethg[1];
+router[3].ethg[3] <--> generic_link <--> router[11].ethg[1];
+router[4].ethg[3] <--> generic_link <--> router[11].ethg[2];
+router[4].ethg[1] <--> generic_link <--> router[19].ethg[0];
+router[5].ethg[3] <--> generic_link <--> router[6].ethg[0];
+router[5].ethg[2] <--> generic_link <--> router[7].ethg[0];
+router[6].ethg[2] <--> generic_link <--> router[9].ethg[0];
+router[7].ethg[2] <--> generic_link <--> router[9].ethg[1];
+router[8].ethg[3] <--> generic_link <--> router[12].ethg[0];
+router[8].ethg[2] <--> generic_link <--> router[13].ethg[1];
+router[9].ethg[3] <--> generic_link <--> router[10].ethg[2];
+router[10].ethg[3] <--> generic_link <--> router[11].ethg[3];
+router[12].ethg[3] <--> generic_link <--> router[13].ethg[2];
+router[12].ethg[1] <--> generic_link <--> router[14].ethg[0];
+router[13].ethg[3] <--> generic_link <--> router[16].ethg[0];
+router[14].ethg[1] <--> generic_link <--> router[18].ethg[0];
+router[14].ethg[2] <--> generic_link <--> router[19].ethg[1];
+router[15].ethg[1] <--> generic_link <--> router[16].ethg[1];
+router[15].ethg[0] <--> generic_link <--> router[17].ethg[0];
+router[15].ethg[2] <--> generic_link <--> router[18].ethg[1];
+router[15].ethg[3] <--> generic_link <--> router[19].ethg[2];
+router[16].ethg[2] <--> generic_link <--> router[18].ethg[2];
+router[16].ethg[3] <--> generic_link <--> router[19].ethg[3];
+router[17].ethg[1] <--> generic_link <--> router[18].ethg[3];
 // Generated Router-Server Links
-server[0].ethg++ <--> generic_link <--> router[0].ethg++;
-server[1].ethg++ <--> generic_link <--> router[1].ethg++;
-server[2].ethg++ <--> generic_link <--> router[2].ethg++;
-server[3].ethg++ <--> generic_link <--> router[3].ethg++;
-server[4].ethg++ <--> generic_link <--> router[4].ethg++;
-server[5].ethg++ <--> generic_link <--> router[5].ethg++;
+server[7].ethg++ <--> generic_link <--> router[0].ethg++;
+server[10].ethg++ <--> generic_link <--> router[0].ethg++;
+server[15].ethg++ <--> generic_link <--> router[1].ethg++;
+server[8].ethg++ <--> generic_link <--> router[1].ethg++;
+server[13].ethg++ <--> generic_link <--> router[1].ethg++;
+server[4].ethg++ <--> generic_link <--> router[2].ethg++;
+server[1].ethg++ <--> generic_link <--> router[3].ethg++;
+server[2].ethg++ <--> generic_link <--> router[4].ethg++;
+server[9].ethg++ <--> generic_link <--> router[4].ethg++;
+server[0].ethg++ <--> generic_link <--> router[6].ethg++;
 server[6].ethg++ <--> generic_link <--> router[6].ethg++;
-server[7].ethg++ <--> generic_link <--> router[7].ethg++;
-server[8].ethg++ <--> generic_link <--> router[8].ethg++;
-server[9].ethg++ <--> generic_link <--> router[9].ethg++;
-server[10].ethg++ <--> generic_link <--> router[10].ethg++;
-server[11].ethg++ <--> generic_link <--> router[11].ethg++;
+server[11].ethg++ <--> generic_link <--> router[7].ethg++;
+server[14].ethg++ <--> generic_link <--> router[7].ethg++;
+server[5].ethg++ <--> generic_link <--> router[9].ethg++;
 server[12].ethg++ <--> generic_link <--> router[12].ethg++;
-server[13].ethg++ <--> generic_link <--> router[13].ethg++;
-server[14].ethg++ <--> generic_link <--> router[14].ethg++;
-server[15].ethg++ <--> generic_link <--> router[15].ethg++;
+server[3].ethg++ <--> generic_link <--> router[14].ethg++;
 }

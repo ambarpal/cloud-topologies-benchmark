@@ -1,13 +1,13 @@
 import numpy as np
 np.random.seed(123) 
 
-perm = np.random.permutation(128)
+perm = np.random.permutation(16)
 demands = [(idx, perm[idx]) for idx in range(perm.shape[0])]
 print (demands)
 
-nRouter = 128
-nRouterPorts = 3
-nServerPorts = 1
+nRouter = 20
+nServer = 16
+nPorts = 4
 
 numPortsUsed = []
 for i in range(nRouter): 
@@ -18,20 +18,31 @@ for i in range(nRouter):
 	edges[i] = []
 
 port = {}
+servers = {}
+router = {}
 for i in range(nRouter):
-	candidates = np.random.permutation(range(nRouter))
+	candidates = np.random.permutation(range(nRouter + nServer))
+	servers[i] = []
 	for j in candidates:
-		if j != i and \
-		numPortsUsed[i] < nRouterPorts and \
-		numPortsUsed[j] < nRouterPorts and \
-		not (j in edges[i]):
-			edges[i].append(j)
-			edges[j].append(i)
-			port[(i, j)] = (numPortsUsed[i], numPortsUsed[j])
-			port[(j, i)] = (numPortsUsed[j], numPortsUsed[i])
+		if j < nRouter:
+			if j != i and \
+			numPortsUsed[i] < nPorts and \
+			numPortsUsed[j] < nPorts and \
+			not (j in edges[i]):
+				edges[i].append(j)
+				edges[j].append(i)
+				port[(i, j)] = (numPortsUsed[i], numPortsUsed[j])
+				port[(j, i)] = (numPortsUsed[j], numPortsUsed[i])
 
-			numPortsUsed[i] += 1
-			numPortsUsed[j] += 1
+				numPortsUsed[i] += 1
+				numPortsUsed[j] += 1
+		else:
+			sidx = j - nRouter
+			if numPortsUsed[i] < nPorts and not (sidx in router):
+				router[sidx] = i
+				servers[i].append(sidx)
+
+				numPortsUsed[i] += 1
 
 adj = np.zeros((nRouter, nRouter))
 for i in range(nRouter):
@@ -47,18 +58,21 @@ for i in range(nRouter):
 			print ("router[{}].ethg[{}] <--> generic_link <--> router[{}].ethg[{}];".format(i, port_used[0], j, port_used[1]))
 
 print ('// Generated Router-Server Links')
-servers = {}
-router = {}
-sidx = 0
-for ridx in range(nRouter):
-	conn_servers = []
-	for _ in range(nServerPorts):
-		conn_servers.append(sidx)
-		router[sidx] = ridx
-		print ("server[{}].ethg++ <--> generic_link <--> router[{}].ethg++;".format(sidx, ridx))
 
-		sidx += 1
-	servers[ridx] = conn_servers
+for ridx in range(nRouter):
+	for sidx in servers[ridx]:
+		print ("server[{}].ethg++ <--> generic_link <--> router[{}].ethg++;".format(sidx, ridx))
+# sidx = 0
+# for ridx in np.random.permutation(range(nRouter)):
+# 	conn_servers = []
+# 	while (numPortsUsed[ridx] < nPorts and sidx < nServer):
+# 		conn_servers.append(sidx)
+# 		router[sidx] = ridx
+# 		print ("server[{}].ethg++ <--> generic_link <--> router[{}].ethg++;".format(sidx, ridx))
+# 		numPortsUsed[ridx] += 1
+
+# 		sidx += 1
+# 	servers[ridx] = conn_servers
 print ('####################################################################')
 
 def ksp(src, dst, k):
@@ -115,7 +129,7 @@ print ('####################################################################')
 print ('<config>')
 print ("\t<interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/>")
 for (src, dst) in demands:
-	paths = ksp(router[src], router[dst], 4)
+	paths = ksp(router[src], router[dst], 6)
 	# print (paths)
 
 	rpath = paths[np.random.randint(low=0, high=len(paths))]
