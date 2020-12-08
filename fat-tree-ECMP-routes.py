@@ -5,7 +5,7 @@ import numpy as np
 np.random.seed(123)
 
 '''Network parameters as stated in NED file.'''
-k = 4 
+k = 4
 assert(k%2==0) #k should be even
 num_edgeSwitches_perPod = int(k/2)
 num_aggSwitches_perPod = int(k/2)
@@ -19,7 +19,7 @@ total_num_coreSwitches = int(pow(int(k/2), 2))
 num_switchGates = k #All switches have k-gates.
 
 
-demand_type = "rand_perm" #Type of demand pairs: rand_perm, 
+demand_type = "big_small" #Type of demand pairs: rand_perm, big_small
 
 
 '''Network class containing mapping of network.'''
@@ -215,7 +215,8 @@ def write_ECMP_routes(f, net_map, demand_perm):
 			write_route_xml(f, route[h][0], dst_label, route[h+1][0], route[h][1])
 
 '''Given a set of demands, calculates ECMP routes and writes to xml file'''
-def create_routes_file(demand_perm):
+def create_routes_file(matchings_demands):
+	demand_perm = matchings_demands[0]
 	f  = open("routes_fat_tree_k=%d_%s.xml"%(k, demand_type), "w+") 
 	f.write("<config>\n")
 	f.write("	<interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/>\n")
@@ -238,53 +239,6 @@ def create_routes_file(demand_perm):
 ###############################################################
 #INI File Stuff
 ###############################################################
-def create_ini_file(demand_perm): 
-	f  = open("basic_fat_tree_k=%d_%s.ini"%(k, demand_type), "w+") 
-	for i in range(len(demand_perm)): 
-		line = ('''**.servers[%d].numApps = 2
-		**.servers[%d].app[0].typename = "TcpSessionApp"
-		**.servers[%d].app[0].active = true
-		**.servers[%d].app[0].localPort = -1
-		**.servers[%d].app[0].connectAddress = "servers[%d]"
-		**.servers[%d].app[0].connectPort = 1000
-		**.servers[%d].app[0].sendBytes = 1MiB
-		**.servers[%d].app[0].tClose = -1s
-
-		**.servers[%d].app[1].typename = "TcpSinkApp"
-		**.servers[%d].app[1].localPort = 1000\n''' % 
-		(i, i, i, i, i, demand_perm[i], i, i, i, demand_perm[i], demand_perm[i]))
-
-		f.write(line)
-	f.close()
-
-
-
-
-
-
-
-
-
-
-
-
-#MAIN STUFF 
-#####################################################
-'''Creates a demand matrix in terms of demadn_type'''
-def create_demand_perm(): 
-	if demand_type == "rand_perm": 
-		return np.random.permutation(total_num_servers)
-
-
-
-def main(): 
-	demand_perm = create_demand_perm()
-	create_ini_file(demand_perm) 
-	create_routes_file(demand_perm)
-	
-
-# main()
-
 ini_file_header = '''[General]
 network = Basic_fat_tree
 
@@ -303,7 +257,7 @@ network = Basic_fat_tree
 *.configurator.dumpTopology = true
 *.configurator.dumpLinks = true
 *.configurator.dumpRoutes = true
-*.configurator.config = xmldoc("routes_fat_tree_k=4_rand_perm.xml")
+*.configurator.config = xmldoc("routes_fat_tree_k=%d_rand_perm.xml")
 
 # Routing settings
 *.*.ipv4.arp.typename = "GlobalArp"
@@ -340,4 +294,64 @@ cmdenv-performance-display = true
 #**.vector-recording=false
 #**.bin-recording=false
 
-**.channel.throughput.result-recording-modes=all'''
+**.channel.throughput.result-recording-modes=all\n\n\n''' % (k)
+
+
+def create_ini_file(matchings_demands): 
+	matchings, demands = matchings_demands
+	f  = open("basic_fat_tree_k=%d_%s.ini"%(k, demand_type), "w+") 
+	f.write(ini_file_header)
+
+	for i in range(len(matchings)): 
+		line = ('''**.servers[%d].numApps = 2
+		**.servers[%d].app[0].typename = "TcpSessionApp"
+		**.servers[%d].app[0].active = true
+		**.servers[%d].app[0].localPort = -1
+		**.servers[%d].app[0].connectAddress = "servers[%d]"
+		**.servers[%d].app[0].connectPort = 1000
+		**.servers[%d].app[0].sendBytes = %dkB
+		**.servers[%d].app[0].tClose = -1s
+
+		**.servers[%d].app[1].typename = "TcpSinkApp"
+		**.servers[%d].app[1].localPort = 1000\n''' % 
+		(i, i, i, i, i, matchings[i], i, i, demands[i], i, matchings[i], matchings[i]))
+
+		f.write(line)
+	
+	f.close()
+
+
+
+
+
+
+
+
+
+
+
+
+#MAIN STUFF 
+#####################################################
+'''Creates a demand matrix in terms of demadn_type'''
+def create_demand_perm(): 
+	matchings = np.random.permutation(total_num_servers)
+	if demand_type == "big_small": 
+		demands = 100*np.ones(total_num_servers)
+		for i in range(0, total_num_servers, int(k/2)): 
+			demands[i] += (int(k/2)-1)*900
+	else: 
+		demands = 1000*np.ones(total_num_servers)
+	return (matchings, demands)
+	
+
+
+
+def main(): 
+	matchings_demands = create_demand_perm()
+	create_ini_file(matchings_demands) 
+	create_routes_file(matchings_demands)
+	
+
+main()
+
